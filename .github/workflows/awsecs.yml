@@ -1,0 +1,61 @@
+name: Deploy to Amazon ECS
+on:
+  push:
+    branches:
+      - master
+env:
+  AWS_REGION: us-east-1    ### change
+  ECS_CLUSTER: app_cluster    ### change
+  CONTAINER_NAME: app   ### change
+  ECS_SERVICE: app_service    ### change
+  ECS_TD: .github/workflows/td.json   ### change
+
+
+
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: "AKIAZ4JE4ZJOJGKFF7VK"  ### change
+          aws-secret-access-key: "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" ### change
+          aws-region: ${{ env.AWS_REGION }}   ### change
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: "679219087964.dkr.ecr.us-east-2.amazonaws.com"  ### change
+          ECR_REPOSITORY: "app_repository"  ### change
+          IMAGE_TAG: latest
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def-1
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_TD }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-1.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: false
