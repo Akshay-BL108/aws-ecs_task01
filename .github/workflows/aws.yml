@@ -36,14 +36,13 @@ jobs:
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
-          ECR_REGISTRY: "679219087964.dkr.ecr.us-east-1.amazonaws.com"  ### change
+          ECR_REGISTRY: "679219087964.dkr.ecr.us-east-2.amazonaws.com"  ### change
           ECR_REPOSITORY: "app_repository"  ### change
           IMAGE_TAG: latest
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def-1
         uses: aws-actions/amazon-ecs-render-task-definition@v1
