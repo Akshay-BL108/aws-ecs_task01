@@ -1,10 +1,8 @@
-FROM golang:19.6-alpine
-
+FROM golang:1.16-alpine
 WORKDIR /app
-
 COPY go.mod .
 COPY go.sum .
-RUN go mod downlod
-COPY . . 
-run go build -o ./out/dist .
-CMD ./out/dist .
+RUN go mod download
+COPY . .
+RUN go build -o ./out/dist .
+CMD ["./out/dist"]
