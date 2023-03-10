@@ -9,8 +9,9 @@ env:
   CONTAINER_NAME: app   ### change
   ECS_SERVICE: app_service    ### change
   ECS_TD: .github/workflows/td.json   ### change
-
-
+permissions:
+  id-token: write
+  contents: read
 
 
 jobs:
