@@ -11,7 +11,7 @@ env:
   ECS_TD: .github/workflows/td.json   ### change
 permissions:
   id-token: write
-  contents: read
+  contents: write
 
 
 jobs:
